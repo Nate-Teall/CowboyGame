@@ -10,6 +10,8 @@ namespace DevcadeGame
 		private GraphicsDeviceManager _graphics;
 		private SpriteBatch _spriteBatch;
 
+		private SpriteFont font;
+
 		/// <summary>
 		/// Game constructor
 		/// </summary>
@@ -30,8 +32,8 @@ namespace DevcadeGame
 			// Set window size if running debug (in release it will be fullscreen)
 			#region
 #if DEBUG
-			_graphics.PreferredBackBufferWidth = 420;
-			_graphics.PreferredBackBufferHeight = 980;
+			_graphics.PreferredBackBufferWidth = 1080;
+			_graphics.PreferredBackBufferHeight = 2520;
 			_graphics.ApplyChanges();
 #else
 			_graphics.PreferredBackBufferWidth = GraphicsDevice.DisplayMode.Width;
@@ -52,9 +54,8 @@ namespace DevcadeGame
 		{
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
-			// TODO: use this.Content to load your game content here
-			// ex.
-			// texture = Content.Load<Texture2D>("fileNameWithoutExtention");
+			font = Content.Load<SpriteFont>("dehors");
+
 		}
 
 		/// <summary>
@@ -89,7 +90,14 @@ namespace DevcadeGame
 			GraphicsDevice.Clear(Color.CornflowerBlue);
 
 			_spriteBatch.Begin();
-			// TODO: Add your drawing code here
+			
+			_spriteBatch.DrawString(
+				font, 
+				"Gaming!",
+				new Vector2(0,0),
+				Color.Black
+			);
+
 			_spriteBatch.End();
 
 			base.Draw(gameTime);
