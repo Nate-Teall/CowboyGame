@@ -10,6 +10,8 @@ namespace DevcadeGame
 		private GraphicsDeviceManager _graphics;
 		private SpriteBatch _spriteBatch;
 
+		private TargetShooter targetShooter;
+
 		private SpriteFont font;
 
 		/// <summary>
@@ -41,8 +43,6 @@ namespace DevcadeGame
 			_graphics.ApplyChanges();
 #endif
 			#endregion
-			
-			// TODO: Add your initialization logic here
 
 			base.Initialize();
 		}
@@ -53,8 +53,14 @@ namespace DevcadeGame
 		protected override void LoadContent()
 		{
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
+			targetShooter = new TargetShooter(_spriteBatch, 
+				_graphics.PreferredBackBufferWidth, 
+				_graphics.PreferredBackBufferHeight,
+				GraphicsDevice
+			);
 
-			font = Content.Load<SpriteFont>("dehors");
+			font = Content.Load<SpriteFont>("Fonts/font");
+			//redButton = Content.Load<Texture2D>("Sprites/tile_0001");
 
 		}
 
@@ -76,7 +82,11 @@ namespace DevcadeGame
 				Exit();
 			}
 
-			// TODO: Add your update logic here
+			// Wait for a player to press a colored button to destroy the target
+			if (Input.GetButtonDown(1, Input.ArcadeButtons.A1))
+			{
+				targetShooter.destroyTarget(Input.ArcadeButtons.A1, 1); // A1 == X
+			}
 
 			base.Update(gameTime);
 		}
@@ -89,14 +99,12 @@ namespace DevcadeGame
 		{
 			GraphicsDevice.Clear(Color.CornflowerBlue);
 
-			_spriteBatch.Begin();
+			// Using SamplerState.PointClamp will fix scaled pixel art being blurry
+			_spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
 			
-			_spriteBatch.DrawString(
-				font, 
-				"Gaming!",
-				new Vector2(0,0),
-				Color.Black
-			);
+			targetShooter.drawTargets();
+
+			targetShooter.drawScores(font);
 
 			_spriteBatch.End();
 
