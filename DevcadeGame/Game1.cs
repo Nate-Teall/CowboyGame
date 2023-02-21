@@ -82,10 +82,16 @@ namespace DevcadeGame
 				Exit();
 			}
 
-			// Wait for a player to press a colored button to destroy the target
+			targetShooter.moveCrosshair(Input.GetStick(1), Input.GetStick(2), gameTime);
+
 			if (Input.GetButtonDown(1, Input.ArcadeButtons.A1))
 			{
-				targetShooter.destroyTarget(Input.ArcadeButtons.A1, 1); // A1 == X
+				targetShooter.p1Shoot();
+			}
+
+			if (Input.GetButtonDown(2, Input.ArcadeButtons.A1))
+			{
+				targetShooter.p2Shoot();
 			}
 
 			base.Update(gameTime);
@@ -102,9 +108,9 @@ namespace DevcadeGame
 			// Using SamplerState.PointClamp will fix scaled pixel art being blurry
 			_spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
 			
-			targetShooter.drawTargets();
+			targetShooter.drawCrosshairs();
 
-			targetShooter.drawScores(font);
+			targetShooter.drawHUD(font);
 
 			_spriteBatch.End();
 
