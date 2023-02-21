@@ -22,7 +22,7 @@ namespace DevcadeGame
         private Crosshair p1Crosshair;
         private Crosshair p2Crosshair;
 
-        private Texture2D[] buttons;
+        private Texture2D targetTexture;
         private List<Target> targets = new List<Target>();
 
         private Random RNG = new Random();
@@ -50,13 +50,9 @@ namespace DevcadeGame
                 new Vector2(3*sWidth/4, sHeight/2)
             );
 
-            Texture2D redButton = Texture2D.FromStream(device, File.OpenRead("Content/Sprites/tile_0001.png"));
-            Texture2D blueButton = Texture2D.FromStream(device, File.OpenRead("Content/Sprites/tile_0002.png"));
-            Texture2D yellowButton = Texture2D.FromStream(device, File.OpenRead("Content/Sprites/tile_0003.png"));
-            Texture2D greenButton = Texture2D.FromStream(device, File.OpenRead("Content/Sprites/tile_0000.png"));
-            buttons = new Texture2D[] {blueButton, greenButton, redButton, yellowButton};
+            targetTexture = Texture2D.FromStream(device, File.OpenRead("Content/Sprites/tile_0001.png"));
 
-            targets.Add(createTarget());
+            createTarget();
 
         }
 
@@ -74,52 +70,40 @@ namespace DevcadeGame
 
         public void p1Shoot()
         {
-            p1Ammo--;
+            p1Ammo = p1Ammo > 0 ? p1Ammo-1 : 0;
         }
 
         public void p2Shoot()
         {
-            p2Ammo--;
+            p2Ammo = p2Ammo > 0 ? p2Ammo-- : 0;
         }
 
-        public Target createTarget()
+        public void createTarget()
         {
-            int colorInt = RNG.Next(4);
-            Texture2D texture = buttons[colorInt];
-            Input.ArcadeButtons button = Input.ArcadeButtons.A2;
+            // TODO: Remove these targets when they get shot or fall of screen
+            int xVel = RNG.Next(-10, 10);
+            int yVel = RNG.Next(-80, -55);
 
-            Target target = new Target(texture, button);
-
-            return target;
+            Target target = new Target(
+                targetTexture, 
+                new Vector2(sWidth/2, sHeight),
+                new Vector2(xVel, yVel)
+            );
+            targets.Add(target);
         }
 
-        public void destroyTarget(Input.ArcadeButtons button, int player)
+        public void moveTargets(GameTime gameTime)
         {
             foreach(Target target in targets)
             {
-                if (target.getButton() == button)
-                {
-                    targets.Remove(target);
-
-                    if (player == 1)
-                    {
-                        p1Score++;
-                    }
-                    else
-                    {
-                        p2Score++;
-                    }
-
-                    break;
-                }
+                target.move(gameTime);
             }
         }
-
         public void drawTargets()
         {
             foreach(Target target in targets) 
             {
-                target.drawSelf(_spriteBatch, new Vector2(sWidth/2, sHeight/2));
+                target.drawSelf(_spriteBatch);
             }
         }
 

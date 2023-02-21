@@ -10,17 +10,26 @@ namespace DevcadeGame
     public class Target
     {
         private Texture2D targetTexture;
-        private Input.ArcadeButtons button;
 
-        public Target(Texture2D texture, Input.ArcadeButtons button)
+        private static int speed = 100;
+        private static Vector2 gravity = new Vector2(0,2f);
+        private Vector2 velocity;
+        private Vector2 pos;
+
+        public Target(Texture2D texture, Vector2 startPos, Vector2 startVel)
         {
+            this.pos = startPos;
             this.targetTexture = texture;
-            this.button = button;
+            this.velocity = startVel;
         }
 
-        public Input.ArcadeButtons getButton() { return this.button; }
+        public void move(GameTime gameTime)
+        {
+            pos += velocity * speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            velocity += gravity;
+        }
 
-        public void drawSelf(SpriteBatch spriteBatch, Vector2 pos)
+        public void drawSelf(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(
 				targetTexture, // texture

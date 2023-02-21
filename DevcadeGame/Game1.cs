@@ -94,6 +94,13 @@ namespace DevcadeGame
 				targetShooter.p2Shoot();
 			}
 
+			if (Input.GetButtonDown(1, Input.ArcadeButtons.A2))
+			{
+				targetShooter.createTarget();
+			}
+
+			targetShooter.moveTargets(gameTime);
+
 			base.Update(gameTime);
 		}
 
@@ -108,6 +115,7 @@ namespace DevcadeGame
 			// Using SamplerState.PointClamp will fix scaled pixel art being blurry
 			_spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
 			
+			targetShooter.drawTargets();
 			targetShooter.drawCrosshairs();
 
 			targetShooter.drawHUD(font);

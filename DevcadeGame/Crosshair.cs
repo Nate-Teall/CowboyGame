@@ -20,10 +20,12 @@ namespace DevcadeGame
         {
             this.texture = texture;
             this.pos = defaultPos;
+            this.velocity = new Vector2(0,0);
         }
 
         public void move(Vector2 acceleration, GameTime gameTime)
         {
+            // Flip Y because up on the stick should decrease yPos
             acceleration.Y *= -1;
             velocity += acceleration;
 
