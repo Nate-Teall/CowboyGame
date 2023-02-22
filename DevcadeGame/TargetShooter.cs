@@ -13,6 +13,8 @@ namespace DevcadeGame
         private static SpriteBatch _spriteBatch;
         private static int sWidth;
         private static int sHeight;
+        private static Timer spawnTimer;
+        private static GameTime gameTime;
 
         private Vector2 gravity = new Vector2(0,2f);
 
@@ -27,16 +29,19 @@ namespace DevcadeGame
         // Simple rectangle texture used for debugging and viewing hitboxes
         private static Texture2D whiteRect;
 
-        // Please make a Player class ong fr fr
-        public TargetShooter(SpriteBatch spriteBatch, int width, int height, GraphicsDevice device, SpriteFont font)
+        // TODO:
+        //      - Later, after there is a menu and whatnot, add gameTime as a static field, it's being used in a lot of places
+        public TargetShooter(SpriteBatch spriteBatch, int width, int height, GraphicsDevice device, SpriteFont font, GameTime gameTime)
         {
             Color[] data = {Color.White};
             TargetShooter.whiteRect = new Texture2D(device, 1, 1);
             whiteRect.SetData(data);
 
-            _spriteBatch = spriteBatch;
-            sWidth = width;
-            sHeight = height;
+            TargetShooter._spriteBatch = spriteBatch;
+            TargetShooter.sWidth = width;
+            TargetShooter.sHeight = height;
+            TargetShooter.spawnTimer = new Timer(gameTime, 2f);
+            TargetShooter.gameTime = gameTime;
 
             Texture2D crosshairTexture = Texture2D.FromStream(device, File.OpenRead("Content/Sprites/Crosshair.png"));
 
@@ -47,7 +52,9 @@ namespace DevcadeGame
                     device.Viewport.Bounds,
                     font,
                     whiteRect
-            ));
+                ),
+                gameTime
+            );
 
             player2 = new Player(
                 new Crosshair(
@@ -56,14 +63,16 @@ namespace DevcadeGame
                     device.Viewport.Bounds,
                     font,
                     whiteRect
-            ));
+                ),
+                gameTime
+            );
 
             targetTexture = Texture2D.FromStream(device, File.OpenRead("Content/Sprites/tile_0001.png"));
             createTarget();
 
         }
 
-        public void moveCrosshair(Vector2 p1Dir, Vector2 p2Dir, GameTime gameTime)
+        public void moveCrosshair(Vector2 p1Dir, Vector2 p2Dir)
         {
             player1.moveCrosshair(p1Dir, gameTime);
             player2.moveCrosshair(p2Dir, gameTime);
@@ -99,10 +108,34 @@ namespace DevcadeGame
 
         }
 
-        public void createTarget()
+        public void updateTimers() 
+        {
+            if (spawnTimer.update())
+            {
+                createTarget();
+                spawnTimer.reset();
+            }
+
+            player1.updateReloadTimer();
+            player2.updateReloadTimer();
+        }
+
+        public void reload(int playerNum)
+        {
+            Player player; 
+
+            if (playerNum == 1)
+                player = player1;
+            else
+                player = player2;
+
+            player.startReload();
+        }
+
+        private void createTarget()
         {
             // TODO: Remove these targets when they get shot or fall of screen
-            int xVel = RNG.Next(-10, 10);
+            int xVel = RNG.Next(-7, 7);
             int yVel = RNG.Next(-80, -55);
 
             Target target = new Target(
@@ -114,7 +147,7 @@ namespace DevcadeGame
             targets.Add(target);
         }
 
-        public void moveTargets(GameTime gameTime)
+        public void moveTargets()
         {
             foreach(Target target in targets)
             {

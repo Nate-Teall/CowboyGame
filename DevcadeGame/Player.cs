@@ -9,13 +9,17 @@ namespace DevcadeGame
     {
         private int score;
         private int ammo;
+        private Timer reloadTimer;
+
+        private bool reloading;
 
         private Crosshair crosshair;
 
-        public Player(Crosshair crosshair) 
+        public Player(Crosshair crosshair, GameTime gameTime) 
         {
             this.score = 0;
             this.ammo = 6;
+            this.reloadTimer = new Timer(gameTime, 0.35f);
 
             this.crosshair = crosshair;
         }
@@ -32,8 +36,10 @@ namespace DevcadeGame
 
         public void drawCrosshair(SpriteBatch spriteBatch) { crosshair.drawSelf(spriteBatch); }
 
-        public Boolean shoot()
+        public bool shoot()
         {
+            reloading = false;
+
             if ( ammo > 0 ){
                 ammo--;
                 return true;
@@ -42,5 +48,26 @@ namespace DevcadeGame
                 return false;
             }
         }
+    
+        public void startReload() { 
+            if (ammo < 6)
+                reloading = true; 
+        }
+
+        public void updateReloadTimer()
+        {
+            if (reloading)
+            {
+                if (reloadTimer.update())
+                {
+                    ammo++;
+                    if (ammo == 6)
+                        reloading = false;
+                    else
+                        reloadTimer.reset();
+                }
+            }
+        }
+
     }
 }

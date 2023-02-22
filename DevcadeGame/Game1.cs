@@ -54,13 +54,6 @@ namespace DevcadeGame
 		{
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 			font = Content.Load<SpriteFont>("Fonts/font");
-			
-			targetShooter = new TargetShooter(_spriteBatch, 
-				_graphics.PreferredBackBufferWidth, 
-				_graphics.PreferredBackBufferHeight,
-				GraphicsDevice,
-				font
-			);
 
 		}
 
@@ -82,54 +75,68 @@ namespace DevcadeGame
 				Exit();
 			}
 
-			// Dpad input for testing on laptop
-			#region
+			if (targetShooter == null)
+			{
+				if (Input.GetButtonDown(1, Input.ArcadeButtons.Menu))
+				{
+					targetShooter = new TargetShooter(_spriteBatch, 
+						_graphics.PreferredBackBufferWidth, 
+						_graphics.PreferredBackBufferHeight,
+						GraphicsDevice,
+						font,
+						gameTime
+					);
+				}
+			}
+			else
+			{
+				// Dpad input for testing on laptop
+				#region
 #if DEBUG
-			Vector2 dPad = new Vector2(0,0);
+				Vector2 dPad = new Vector2(0,0);
 
-			if (GamePad.GetState(0).IsButtonDown(Buttons.DPadUp))
-			{
-				dPad.Y = 1;
-			}
+				if (GamePad.GetState(0).IsButtonDown(Buttons.DPadUp))
+				{
+					dPad.Y = 1;
+				}
 
-			if (GamePad.GetState(0).IsButtonDown(Buttons.DPadDown))
-			{
-				dPad.Y = -1;
-			}
+				if (GamePad.GetState(0).IsButtonDown(Buttons.DPadDown))
+				{
+					dPad.Y = -1;
+				}
 
-			if (GamePad.GetState(0).IsButtonDown(Buttons.DPadRight))
-			{
-				dPad.X = 1;
-			}
+				if (GamePad.GetState(0).IsButtonDown(Buttons.DPadRight))
+				{
+					dPad.X = 1;
+				}
 
-			if (GamePad.GetState(0).IsButtonDown(Buttons.DPadLeft))
-			{
-				dPad.X = -1;
-			}
+				if (GamePad.GetState(0).IsButtonDown(Buttons.DPadLeft))
+				{
+					dPad.X = -1;
+				}
 
-			targetShooter.moveCrosshair(dPad, Input.GetStick(2), gameTime);
+				targetShooter.moveCrosshair(dPad, Input.GetStick(2));
 #else
-			// Devcade stick input
-			targetShooter.moveCrosshair(Input.GetStick(1), Input.GetStick(2), gameTime);
+				// Devcade stick input
+				targetShooter.moveCrosshair(Input.GetStick(1), Input.GetStick(2), gameTime);
 #endif
-			#endregion
+				#endregion
 
-			if (Input.GetButtonDown(1, Input.ArcadeButtons.A1))
-			{
-				targetShooter.shoot(1);
+				if (Input.GetButtonDown(1, Input.ArcadeButtons.A1))
+					targetShooter.shoot(1);
+
+				if (Input.GetButtonDown(2, Input.ArcadeButtons.A1))
+					targetShooter.shoot(2);
+
+				if (Input.GetButtonDown(1, Input.ArcadeButtons.A2))
+					targetShooter.reload(1);
+
+				if (Input.GetButtonDown(2, Input.ArcadeButtons.A2))
+					targetShooter.reload(2);
+
+				targetShooter.updateTimers();
+				targetShooter.moveTargets();
 			}
-
-			if (Input.GetButtonDown(2, Input.ArcadeButtons.A1))
-			{
-				targetShooter.shoot(2);
-			}
-
-			if (Input.GetButtonDown(1, Input.ArcadeButtons.A3))
-			{
-				targetShooter.createTarget();
-			}
-
-			targetShooter.moveTargets(gameTime);
 
 			base.Update(gameTime);
 		}
@@ -145,10 +152,12 @@ namespace DevcadeGame
 			// Using SamplerState.PointClamp will fix scaled pixel art being blurry
 			_spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
 			
-			targetShooter.drawTargets();
-			targetShooter.drawCrosshairs();
-
-			targetShooter.drawHUD(font);
+			if (targetShooter != null) 
+			{
+				targetShooter.drawTargets();
+				targetShooter.drawCrosshairs();
+				targetShooter.drawHUD(font);
+			}
 
 			_spriteBatch.End();
 
