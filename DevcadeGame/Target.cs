@@ -7,41 +7,58 @@ using Devcade;
 
 namespace DevcadeGame
 {
-    public class Target
+    public class Target : GameObject
     {
         private Texture2D targetTexture;
+        private static int textureScale = 15;
 
         private static int speed = 100;
-        private static Vector2 gravity = new Vector2(0,2f);
         private Vector2 velocity;
-        private Vector2 pos;
+        private Rectangle hitbox;
 
-        public Target(Texture2D texture, Vector2 startPos, Vector2 startVel)
+        // Simple rectangle texture used for debugging and viewing hitboxes
+        private static Texture2D whiteRect;
+
+        public Target(Texture2D texture, Vector2 startPos, Vector2 startVel, Texture2D rectangle)
         {
-            this.pos = startPos;
+            Target.whiteRect = rectangle;
             this.targetTexture = texture;
             this.velocity = startVel;
+
+            this.hitbox = new Rectangle(new Point((int)startPos.X, (int)startPos.Y), new Point(texture.Width*textureScale));
         }
 
-        public void move(GameTime gameTime)
+        public Rectangle getHitbox() { return hitbox; }
+
+        public void move(Vector2 acceleration, GameTime gameTime)
         {
-            pos += velocity * speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            velocity += gravity;
+            velocity += acceleration;
+            hitbox.Offset(velocity * speed * (float)gameTime.ElapsedGameTime.TotalSeconds);
         }
 
         public void drawSelf(SpriteBatch spriteBatch)
         {
+            /*
+            // Draw a rectangle showing the hitbox
             spriteBatch.Draw(
-				targetTexture, // texture
-				pos, // pos
-				null, // nullable sourceRect
-				Color.White, 
-				0f, // rotation
-				new Vector2(targetTexture.Width/2, targetTexture.Height/2), // rotation origin
-				15,
-				SpriteEffects.None,
-				1
-			);
+                whiteRect,
+                hitbox,
+                Color.Black
+            ); */
+
+            // Uses the hitbox to determine the target's position and scale
+            // Instead of a pos vector, we use the rectangle because it will also help track collision
+            spriteBatch.Draw(
+                targetTexture, // texture
+                hitbox, // pos and scale
+                null, // nullable sourceRect
+                Color.White, 
+                0f, // rotation
+                new Vector2(0,0), // rotation origin
+                SpriteEffects.None,
+                1
+            );
+
         }
 
     }

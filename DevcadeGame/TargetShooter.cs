@@ -14,68 +14,89 @@ namespace DevcadeGame
         private static int sWidth;
         private static int sHeight;
 
-        private int p1Score;
-        private int p2Score;
-        private int p1Ammo;
-        private int p2Ammo;
+        private Vector2 gravity = new Vector2(0,2f);
 
-        private Crosshair p1Crosshair;
-        private Crosshair p2Crosshair;
+        private Player player1;
+        private Player player2;
 
         private Texture2D targetTexture;
         private List<Target> targets = new List<Target>();
 
         private Random RNG = new Random();
 
-        public TargetShooter(SpriteBatch spriteBatch, int width, int height, GraphicsDevice device)
+        // Simple rectangle texture used for debugging and viewing hitboxes
+        private static Texture2D whiteRect;
+
+        // Please make a Player class ong fr fr
+        public TargetShooter(SpriteBatch spriteBatch, int width, int height, GraphicsDevice device, SpriteFont font)
         {
+            Color[] data = {Color.White};
+            TargetShooter.whiteRect = new Texture2D(device, 1, 1);
+            whiteRect.SetData(data);
+
             _spriteBatch = spriteBatch;
             sWidth = width;
             sHeight = height;
 
-            p1Score = 0;
-            p2Score = 0;
-            p1Ammo = 6;
-            p2Ammo = 6;
-
             Texture2D crosshairTexture = Texture2D.FromStream(device, File.OpenRead("Content/Sprites/Crosshair.png"));
 
-            p1Crosshair = new Crosshair(
-                crosshairTexture,
-                new Vector2(sWidth/4, sHeight/2)
-            );
+            player1 = new Player(
+                new Crosshair(
+                    crosshairTexture,
+                    new Vector2(sWidth/4, sHeight/2),
+                    device.Viewport.Bounds,
+                    font,
+                    whiteRect
+            ));
 
-            p2Crosshair = new Crosshair(
-                crosshairTexture,
-                new Vector2(3*sWidth/4, sHeight/2)
-            );
+            player2 = new Player(
+                new Crosshair(
+                    crosshairTexture,
+                    new Vector2(3*sWidth/4, sHeight/2),
+                    device.Viewport.Bounds,
+                    font,
+                    whiteRect
+            ));
 
             targetTexture = Texture2D.FromStream(device, File.OpenRead("Content/Sprites/tile_0001.png"));
-
             createTarget();
 
         }
 
         public void moveCrosshair(Vector2 p1Dir, Vector2 p2Dir, GameTime gameTime)
         {
-            p1Crosshair.move(p1Dir, gameTime);
-            p2Crosshair.move(p2Dir, gameTime);
+            player1.moveCrosshair(p1Dir, gameTime);
+            player2.moveCrosshair(p2Dir, gameTime);
         }
 
         public void drawCrosshairs() 
         {
-            p1Crosshair.drawSelf(_spriteBatch);
-            p2Crosshair.drawSelf(_spriteBatch);
+            player1.drawCrosshair(_spriteBatch);
+            player2.drawCrosshair(_spriteBatch);
         }
 
-        public void p1Shoot()
+        public void shoot(int playerNum)
         {
-            p1Ammo = p1Ammo > 0 ? p1Ammo-1 : 0;
-        }
+            Player player; 
 
-        public void p2Shoot()
-        {
-            p2Ammo = p2Ammo > 0 ? p2Ammo-- : 0;
+            if (playerNum == 1)
+                player = player1;
+            else
+                player = player2;
+
+            if ( player.shoot() )
+            {
+                foreach(Target target in targets)
+                {
+                    if ( player.GetCrosshair().getHitbox().Intersects(target.getHitbox()) ) // bruh
+                    {
+                        player.incrementScore();
+                        targets.Remove(target);
+                        break;
+                    }
+                }
+            }
+
         }
 
         public void createTarget()
@@ -87,7 +108,8 @@ namespace DevcadeGame
             Target target = new Target(
                 targetTexture, 
                 new Vector2(sWidth/2, sHeight),
-                new Vector2(xVel, yVel)
+                new Vector2(xVel, yVel),
+                whiteRect
             );
             targets.Add(target);
         }
@@ -96,7 +118,7 @@ namespace DevcadeGame
         {
             foreach(Target target in targets)
             {
-                target.move(gameTime);
+                target.move(gravity, gameTime);
             }
         }
         public void drawTargets()
@@ -109,12 +131,13 @@ namespace DevcadeGame
 
         public void drawHUD(SpriteFont font) 
         {
-            string p2ScoreString = "Player 2: " + p2Score.ToString();
-            Vector2 p2Size = font.MeasureString(p2ScoreString);
+            string p2ScoreString = "Player 2: " + player2.getScore().ToString();
+            string p1ScoreString = "Player 1: " + player1.getScore().ToString();
+            Vector2 p2ScoreSize = font.MeasureString(p2ScoreString);
 
             _spriteBatch.DrawString(
                 font, 
-                "Player 1: " + p1Score.ToString(),
+                p1ScoreString,
                 new Vector2(0,0),
                 Color.Black
             );
@@ -122,24 +145,25 @@ namespace DevcadeGame
             _spriteBatch.DrawString(
                 font, 
                 p2ScoreString,
-                new Vector2(sWidth - p2Size.X ,0),
+                new Vector2(sWidth - p2ScoreSize.X ,0),
                 Color.Black
             );
 
-            Vector2 p2AmmoSize = font.MeasureString(p2Ammo.ToString());
-            Vector2 p1AmmoSize = font.MeasureString(p2Ammo.ToString());
+            string p1AmmoString = player1.getAmmo().ToString();
+            string p2AmmoString = player2.getAmmo().ToString();
+            Vector2 p2AmmoSize = font.MeasureString(player2.getAmmo().ToString());
 
             _spriteBatch.DrawString(
                 font,
-                p1Ammo.ToString(),
-                new Vector2(0,3*sHeight/4 - p1AmmoSize.Y),
+                p1AmmoString,
+                new Vector2(0,3*sHeight/4),
                 Color.Black
             );
 
             _spriteBatch.DrawString(
                 font,
-                p2Ammo.ToString(),
-                new Vector2(sWidth - p2AmmoSize.X, 3*sHeight/4 - p2AmmoSize.Y),
+                p2AmmoString,
+                new Vector2(sWidth - p2AmmoSize.X, 3*sHeight/4),
                 Color.Black
             );
         }

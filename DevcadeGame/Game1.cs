@@ -35,7 +35,7 @@ namespace DevcadeGame
 			#region
 #if DEBUG
 			_graphics.PreferredBackBufferWidth = 1080;
-			_graphics.PreferredBackBufferHeight = 2520;
+			_graphics.PreferredBackBufferHeight = 2520; //2520
 			_graphics.ApplyChanges();
 #else
 			_graphics.PreferredBackBufferWidth = GraphicsDevice.DisplayMode.Width;
@@ -53,14 +53,14 @@ namespace DevcadeGame
 		protected override void LoadContent()
 		{
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
+			font = Content.Load<SpriteFont>("Fonts/font");
+			
 			targetShooter = new TargetShooter(_spriteBatch, 
 				_graphics.PreferredBackBufferWidth, 
 				_graphics.PreferredBackBufferHeight,
-				GraphicsDevice
+				GraphicsDevice,
+				font
 			);
-
-			font = Content.Load<SpriteFont>("Fonts/font");
-			//redButton = Content.Load<Texture2D>("Sprites/tile_0001");
 
 		}
 
@@ -82,19 +82,49 @@ namespace DevcadeGame
 				Exit();
 			}
 
+			// Dpad input for testing on laptop
+			#region
+#if DEBUG
+			Vector2 dPad = new Vector2(0,0);
+
+			if (GamePad.GetState(0).IsButtonDown(Buttons.DPadUp))
+			{
+				dPad.Y = 1;
+			}
+
+			if (GamePad.GetState(0).IsButtonDown(Buttons.DPadDown))
+			{
+				dPad.Y = -1;
+			}
+
+			if (GamePad.GetState(0).IsButtonDown(Buttons.DPadRight))
+			{
+				dPad.X = 1;
+			}
+
+			if (GamePad.GetState(0).IsButtonDown(Buttons.DPadLeft))
+			{
+				dPad.X = -1;
+			}
+
+			targetShooter.moveCrosshair(dPad, Input.GetStick(2), gameTime);
+#else
+			// Devcade stick input
 			targetShooter.moveCrosshair(Input.GetStick(1), Input.GetStick(2), gameTime);
+#endif
+			#endregion
 
 			if (Input.GetButtonDown(1, Input.ArcadeButtons.A1))
 			{
-				targetShooter.p1Shoot();
+				targetShooter.shoot(1);
 			}
 
 			if (Input.GetButtonDown(2, Input.ArcadeButtons.A1))
 			{
-				targetShooter.p2Shoot();
+				targetShooter.shoot(2);
 			}
 
-			if (Input.GetButtonDown(1, Input.ArcadeButtons.A2))
+			if (Input.GetButtonDown(1, Input.ArcadeButtons.A3))
 			{
 				targetShooter.createTarget();
 			}
