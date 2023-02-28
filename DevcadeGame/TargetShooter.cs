@@ -15,33 +15,38 @@ namespace DevcadeGame
         private static int sHeight;
         private static Timer spawnTimer;
         private static GameTime gameTime;
-
-        private Vector2 gravity = new Vector2(0,2f);
+        private static Rectangle bounds;
 
         private Player player1;
         private Player player2;
 
         private Texture2D targetTexture;
+        private Texture2D bombTexture;
+        private Texture2D bonusTexture;
+
         private List<Target> targets = new List<Target>();
 
-        private Random RNG = new Random();
+        private Random RNG;
 
         // Simple rectangle texture used for debugging and viewing hitboxes
-        private static Texture2D whiteRect;
+        //private static Texture2D whiteRect;
 
         // TODO:
         //      - Later, after there is a menu and whatnot, add gameTime as a static field, it's being used in a lot of places
         public TargetShooter(SpriteBatch spriteBatch, int width, int height, GraphicsDevice device, SpriteFont font, GameTime gameTime)
         {
-            Color[] data = {Color.White};
+            /* Color[] data = {Color.White};
             TargetShooter.whiteRect = new Texture2D(device, 1, 1);
-            whiteRect.SetData(data);
+            whiteRect.SetData(data); */
 
             TargetShooter._spriteBatch = spriteBatch;
             TargetShooter.sWidth = width;
             TargetShooter.sHeight = height;
             TargetShooter.spawnTimer = new Timer(gameTime, 2f);
             TargetShooter.gameTime = gameTime;
+            TargetShooter.bounds = device.Viewport.Bounds;
+
+            RNG = new Random();
 
             Texture2D crosshairTexture = Texture2D.FromStream(device, File.OpenRead("Content/Sprites/Crosshair.png"));
 
@@ -49,9 +54,7 @@ namespace DevcadeGame
                 new Crosshair(
                     crosshairTexture,
                     new Vector2(sWidth/4, sHeight/2),
-                    device.Viewport.Bounds,
-                    font,
-                    whiteRect
+                    bounds
                 ),
                 gameTime
             );
@@ -60,14 +63,15 @@ namespace DevcadeGame
                 new Crosshair(
                     crosshairTexture,
                     new Vector2(3*sWidth/4, sHeight/2),
-                    device.Viewport.Bounds,
-                    font,
-                    whiteRect
+                    bounds
                 ),
                 gameTime
             );
 
-            targetTexture = Texture2D.FromStream(device, File.OpenRead("Content/Sprites/tile_0001.png"));
+            this.targetTexture = Texture2D.FromStream(device, File.OpenRead("Content/Sprites/tile_0000.png"));
+            this.bombTexture = Texture2D.FromStream(device, File.OpenRead("Content/Sprites/tile_0001.png"));
+            this.bonusTexture = Texture2D.FromStream(device, File.OpenRead("Content/Sprites/tile_0003.png"));
+
             createTarget();
 
         }
@@ -99,8 +103,13 @@ namespace DevcadeGame
                 {
                     if ( player.GetCrosshair().getHitbox().Intersects(target.getHitbox()) ) // bruh
                     {
-                        player.incrementScore();
-                        targets.Remove(target);
+                        target.getShot();
+                        if (target.isDestroyed())
+                        {
+                            player.changeScore(target.getScore());
+                            targets.Remove(target);
+                        }
+
                         break;
                     }
                 }
@@ -135,15 +144,39 @@ namespace DevcadeGame
         private void createTarget()
         {
             // TODO: Remove these targets when they get shot or fall of screen
-            int xVel = RNG.Next(-7, 7);
-            int yVel = RNG.Next(-80, -55);
+            int xVel = RNG.Next(-10, 10);
+            int yVel = RNG.Next(-90, -70);
 
-            Target target = new Target(
-                targetTexture, 
-                new Vector2(sWidth/2, sHeight),
-                new Vector2(xVel, yVel),
-                whiteRect
-            );
+            int randomVal = RNG.Next(11); 
+
+            Target target;
+
+            if (randomVal < 8) {
+                target = new Target(
+                    targetTexture, 
+                    new Vector2(sWidth/2, sHeight),
+                    new Vector2(xVel, yVel),
+                    bounds,
+                    5
+                );
+            } else if (randomVal < 10) {
+                target = new Target(
+                    bombTexture,
+                    new Vector2(sWidth/2, sHeight),
+                    new Vector2(xVel, yVel),
+                    bounds,
+                    -10
+                );
+            } else {
+                target = new BonusTarget(
+                    bonusTexture, 
+                    new Vector2(sWidth/2, sHeight-(targetTexture.Height*15)),
+                    new Vector2(xVel, yVel),
+                    RNG,
+                    bounds
+                );
+            }
+
             targets.Add(target);
         }
 
@@ -151,7 +184,7 @@ namespace DevcadeGame
         {
             foreach(Target target in targets)
             {
-                target.move(gravity, gameTime);
+                target.move(gameTime);
             }
         }
         public void drawTargets()

@@ -35,7 +35,7 @@ namespace DevcadeGame
 			#region
 #if DEBUG
 			_graphics.PreferredBackBufferWidth = 1080;
-			_graphics.PreferredBackBufferHeight = 2520; //2520
+			_graphics.PreferredBackBufferHeight = 2000; //2520
 			_graphics.ApplyChanges();
 #else
 			_graphics.PreferredBackBufferWidth = GraphicsDevice.DisplayMode.Width;

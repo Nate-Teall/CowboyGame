@@ -5,12 +5,12 @@ using Devcade;
 
 namespace DevcadeGame 
 {
-    public class Crosshair : GameObject
+    public class Crosshair
     {
         private Texture2D texture;
         private static int textureScale = 12;
 
-        private static int speed = 125;
+        private static int speed = 100;
         private static Vector2 decelleration = new Vector2(0.97f, 0.97f);
         private static Rectangle bounds;
 
@@ -19,20 +19,20 @@ namespace DevcadeGame
         private Rectangle hitbox;
 
         // Simple rectangle texture used for debugging and viewing hitboxes
-        private static Texture2D whiteRect;
+        //private static Texture2D whiteRect;
         // Font used for showing debug information
-        private static SpriteFont debugFont;
+        //private static SpriteFont debugFont;
 
-        public Crosshair(Texture2D texture, Vector2 startPos, Rectangle bounds, SpriteFont font, Texture2D rectangle) // font and texture are for debugging
+        public Crosshair(Texture2D texture, Vector2 startPos, Rectangle bounds) // font and texture are for debugging
         {
-            Crosshair.debugFont = font;
+            //Crosshair.debugFont = font;
             Crosshair.bounds = bounds;
 
             this.texture = texture;
             this.pos = startPos;
             this.velocity = new Vector2(0,0);
 
-            Crosshair.whiteRect = rectangle;
+            //Crosshair.whiteRect = rectangle;
 
             // The first point in the rect construction gives the top left of the hitbox, while pos will be the center of the crosshair
             this.hitbox = new Rectangle(new Point(0,0), new Point(texture.Width*textureScale/2));

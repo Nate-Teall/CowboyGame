@@ -30,7 +30,7 @@ namespace DevcadeGame
 
         public int getAmmo() { return ammo; }
 
-        public void incrementScore() { score++; }
+        public void changeScore(int amt) { score += amt; }
 
         public void moveCrosshair(Vector2 dir, GameTime gameTime) { crosshair.move(dir, gameTime); }
 
